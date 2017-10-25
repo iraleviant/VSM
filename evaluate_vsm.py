@@ -21,7 +21,7 @@ lp_map["russian"] = u"ru_"
 
 ###Usage
 
-###python evaluate.py word_vector_location language
+###python evaluate_vsm.py file_word_vector_location language human_word_pairs_scores_file
 
 
 # def normalise_word_vectors(word_vectors, norm=1.0):
@@ -54,12 +54,6 @@ def load_word_vectors(file_destination_vectors, language):
                 transformed_key = unicode(key) #?
             except:
                 print "CANT LOAD", transformed_key
-            # if lp_map[language] not in key:
-            #     key = lp_map[language] + key
-            # try:
-            #     transformed_key = unicode(key)
-            # except:
-            #     print "CANT LOAD", transformed_key
             word_dictionary_vecs[transformed_key] = numpy.fromstring(line[1], dtype="float32", sep=" ")
     except:
         print "Word vectors could not be loaded from:", file_destination_vectors
@@ -89,11 +83,7 @@ def simlex_analysis(word_dictionary_vecs, words_human_scores_file, language="ger
     """
     pair_list_human = []    #((word1,word2), human_score), only words that have vecs
     
-    # if source == "simlex":
-    #     fread_simlex = codecs.open("evaluation/simlex-" + language + ".txt", 'r', 'utf-8')
-    # else:
-    #     fread_simlex = codecs.open("evaluation/ws-353/wordsim353-" + source + ".txt", 'r',
-    #                                'utf-8')  # specify english, english-rel, etc.
+
 
     fread_simlex=codecs.open(words_human_scores_file, 'r', 'utf-8')  #scores from felix hill
 
@@ -169,13 +159,6 @@ def main():
     simlex_score, simlex_coverage = simlex_analysis(word_vectors,human_word_pairs_scores_file, language)
     print "SimLex-999 score and coverage:", simlex_score, simlex_coverage
 
-#    # WordSim Validation scores:
-#    c1, cov1 = simlex_analysis(word_vectors, language, source=language)
-#    c2, cov2 = simlex_analysis(word_vectors, language, source=language + "-sim")
-#    c3, cov3 = simlex_analysis(word_vectors, language, source=language + "-rel")
-#    print "WordSim overall score and coverage:", c1, cov1
-#    print "WordSim Similarity score and coverage:", c2, cov2
-#    print "WordSim Relatedness score and coverage:", c3, cov3, "\n"
 
 
 if __name__ == '__main__':
