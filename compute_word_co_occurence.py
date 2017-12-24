@@ -100,16 +100,10 @@ def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat
         row=cws_clean[elements[0]]
         col=cws_clean[elements[1]]
         
-        #h8 = tb.open_file(dataset_name+".h5", 'w')
-        #co_mat = h5.root.MAT_COO
+       
         co_mat[row,col]+=1
         co_mat[col,row]+=1
-        #h8.close()
-        
-        
-        #ofh.write(elements[0]+' '+elements[1]+'\n')
-        #ofh.write(elements[1]+' '+elements[0]+'_r'+ '\n')
-        
+    
         ### next in the original code: (I don't understand why extra incrementing)
         #$word_vocab->{$elements[1]}++;
         #$elements[0] .= "_r";
@@ -156,30 +150,22 @@ def main():
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
     patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns_p.dat'
     mat_file='test_mat.npz'
-    #context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_test11.dat"
-    #word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_test11.dat"
-    #context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_test11.dat"
-    #dataset_name = '/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/Patterns11'
-    
     dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_test1.txt'
     
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     
     ifs = input_files.split(",")  #ifs=input files, spolits in case there are several input files
-    
       
     cws_clean = json.load(open(dic_file)) #this how you read json
     print "Finished reading content word dictionary its length is:", len(cws_clean)
      
 
     co_mat = lil_matrix((len(cws_clean), len(cws_clean)) )
-    #co_mat=np.zeros( shape=(len(cws), len(cws) )   )
+    #co_mat=np.zeros( shape=(len(cws), len(cws) )   ) #doesn't work for huge size
     
     n_lines = 0
-    
-    #global num_words
-    #num_words=0
+
     for corpus_file in ifs:
         n_lines = 0
         print "Reading ", corpus_file
@@ -207,13 +193,6 @@ def main():
         
         ifh.close()
         
-    #print "The number of words in patterns is: ", num_words
-    #print "The number of words in patterns is len(pattern_words): ", len(pattern_words_dict)
-    
-    print "Finished searching for patterns"
-    
-    
- 
     #===========================================================================
     print "Preparing to write co-occurence mat to file"
     
