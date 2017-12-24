@@ -84,31 +84,40 @@ def read_patterns_trie(patterns_input_file):
     return tr
 
 
-def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat):
+def  add_patt_instance(words, start, 0, patterns_trie, cws, ofh, word_vocab, context_vocab):
     
     # Pattern found.
-    #global num_words
     if patterns_trie.node.has_key(PATT_STR):
         orig_patt_str=patterns_trie.node[PATT_STR][0] #for example: 'CW-and-CW'
-        cw_indices=np.asarray(patterns_trie.node[PATT_STR][1]) #for example: [0 2]
+        cw_indices=np.asarray(patterns_trie.node[PATT_STR][1]) #for example: [0,2]
         beg_index=start-patt_index
         pattern_words=words[beg_index:beg_index+cw_indices[1]+1] #for example: big and small
         elements=np.array(pattern_words)[cw_indices] #elements[0]=big, elements[1]=small
-      
         
-        #update the co-occorence mat
-        row=cws_clean[elements[0]]
-        col=cws_clean[elements[1]]
+        if word_vocab.has_key(elements[0]) is True:
+            word_vocab[elements[0]]+=1
+        else:
+            word_vocab[elements[0]]=1
+           
+        if word_vocab.has_key(elements[1]) is True:
+            word_vocab[elements[1]]+=1
+        else:
+            word_vocab[elements[1]]=1
+           
+             
+        if context_vocab.has_key(elements[1]) is True:
+            context_vocab[elements[1]]+=1
+        else:
+            context_vocab[elements[1]]=1
+            
+        if context_vocab.has_key(elements[0]+'_r') is True:  #_r ??
+            context_vocab[elements[0]+'_r']+=1
+        else:
+            context_vocab[elements[0]+'_r']=1
         
-        #h8 = tb.open_file(dataset_name+".h5", 'w')
-        #co_mat = h5.root.MAT_COO
-        co_mat[row,col]+=1
-        co_mat[col,row]+=1
-        #h8.close()
         
-        
-        #ofh.write(elements[0]+' '+elements[1]+'\n')
-        #ofh.write(elements[1]+' '+elements[0]+'_r'+ '\n')
+        ofh.write(elements[0]+' '+elements[1]+'\n')
+        ofh.write(elements[1]+' '+elements[0]+'_r'+ '\n')
         
         ### next in the original code: (I don't understand why extra incrementing)
         #$word_vocab->{$elements[1]}++;
@@ -127,10 +136,11 @@ def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat
     # Next word could either be one of the words the continues a pattern, or a wildcard.
     if patterns_trie.node.has_key(words[start]):
         substr=patterns_trie.sub_trie(words[start])
-        add_patt_instance(words, start+1,patt_index+1, substr, cws_clean, co_mat)
-    elif (not bool(re.match(r'^(?!.*[a-z]+).*$', words[start])) ) and ( cws_clean.has_key(words[start]) )  and ( patterns_trie.node.has_key(CW_SYMBOL) ) :
+        add_patt_instance(words, start+1,patt_index+1, substr, cws, ofh, word_vocab, context_vocab)
+    elif (not bool(re.match(r'^(?!.*[a-z]+).*$', words[start])) ) and ( cws.has_key(words[start]) )  and ( patterns_trie.node.has_key(CW_SYMBOL) ) :
         substr=patterns_trie.sub_trie(CW_SYMBOL)
-        add_patt_instance(words, start+1, patt_index+1, substr, cws_clean, co_mat)
+        add_patt_instance(words, start+1, patt_index+1, substr, cws, ofh, word_vocab, context_vocab)
+        
         
 def write_vocab(dict, output_file):
     
@@ -151,6 +161,69 @@ def write_vocab(dict, output_file):
         ofh.write('\n')
     
     ofh.close()
+
+ def get_cws(files):
+    print "Generating word count"
+    # Generate list from text
+    n_sent=0
+    n_words=0
+    stats={}
+    
+    for corpus_file in files:
+        print "Reading  ", corpus_file
+        try:
+            ifh = codecs.open(corpus_file, 'r', 'utf-8')
+        except:
+            print "Can't open ", corpus_file, "for reading" 
+            continue
+        
+        #lines = ifh.readlines()
+        
+        for line in ifh:
+            n_sent+=1
+            if n_sent % 10000 == 0: #n_sent divides in 10000 without remainder
+                print  str(round(float(n_sent)/1000, 0))+'K'+'\r', 
+                sys.stdout.flush()
+
+                
+            # Randomly skip 90% of the sentences to get an even distribution of the data.
+            line=line.rstrip()
+            #line=line.lower() #lower case
+            words=line.split(" ")
+            #words=re.findall(r'\w+|[^\w\s]+', line)
+            
+            for word in words:
+                # Skip empty words and punctuation.
+                ##The "^" "anchors" to the beginning of a string, and the "$" "anchors" To the end of a string, which means that,
+                ##in this case, the match must start at the beginning of a string and end at the end of the string.
+                if not(len(word)) or bool(re.match(r'^(?!.*[a-z]+).*$', word)):  #r'\b[a-zA-Z]+\b', \b-# Assert position at a word boundary
+                    continue   #next if ($w =~ /^[^a-z]++$/ or not length($w));
+                n_words+=1
+                if stats.has_key(word) is True:
+                    stats[word]+=1  #stats is a dictionary of all words and their counts {alliance=>'1', it=> '1'}
+                else:
+                    stats[word]=1
+        ifh.close() 
+            
+    print "The size of words dictionary is: ", len(stats)      
+   
+    cws={}
+    
+    sotred_words=sorted(stats.items(), key=lambda x:-x[1]) #sorts the words in stats based to their fequency(values) from top to bottom 
+
+    for word in sotred_words: #word is a tuple: ('cute', 4)
+        tmp=stats[word[0]]
+        if float(stats[word[0]])/n_words > HIGH_FREQUENCY_THR:
+            continue    
+        elif  stats[word[0]]>= MIN_FREQ:
+            cws[word[0]]=1
+        else:
+            break #it is sorted of the the word with the highest frequency doesn't> min_freq than none will be
+            
+    print "Selected", len(cws) , " content words"
+    return cws
+
+    
     
 def main():
 #===============================================================================
@@ -195,10 +268,9 @@ def main():
         ofh = codecs.open(context_pairs_output_file, 'w', 'utf-8')
     except:
         print "Can't open ", context_pairs_output_file, "for writing" 
+    
     n_lines = 0
     
-    #global num_words
-    #num_words=0
     for corpus_file in ifs:
         n_lines = 0
         print "Reading ", corpus_file
@@ -222,27 +294,19 @@ def main():
             # Search for patterns starting at each word in the sentence.
             end_loop=len(words)-2
             for start in range(0,end_loop):
-                add_patt_instance(words, start, 0, patterns_trie, cws_clean, co_mat)
+                add_patt_instance(words, start, 0, patterns_trie, cws, ofh, word_vocab, context_vocab)
         
         ifh.close()
-        
-    #print "The number of words in patterns is: ", num_words
-    #print "The number of words in patterns is len(pattern_words): ", len(pattern_words_dict)
-    
-    #with open(dic_file, 'w') as fl:
-    #    fl.write(json.dumps(pattern_words_dict))
-    print "Finished searching for patterns"
-    
-    #ofh.close()
-    
- 
-    #===========================================================================
-    print "Preparing to write co-occurence mat to file"
-    
-    ss.save_npz(mat_file, csr_matrix(co_mat))
+   
+    ofh.close()
 
-    print "I'm here"
-  
+    print "Finished searching for patterns"
+        
+    # Writing word and context vocabularies.
+    write_vocab(word_vocab, word_vocabularty_output_file)
+    write_vocab(context_vocab, context_vocabularty_output_file)
+    
+    
     
 #################################################################     
 ########################
