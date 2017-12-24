@@ -174,26 +174,27 @@ def main():
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
     patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns_p.dat'
     mat_file='test_mat.npz'
-    #context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_test11.dat"
-    #word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_test11.dat"
-    #context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_test11.dat"
-    #dataset_name = '/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/Patterns11'
-    
-    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_test1.txt'
-    
+    context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_test11.dat"
+    word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_test11.dat"
+    context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_test11.dat"
+      
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
+    word_vocab={}
+    context_vocab={}
     
     ifs = input_files.split(",")  #ifs=input files, spolits in case there are several input files
     
       
-    cws_clean = json.load(open(dic_file)) #this how you read json
-    print "Finished reading content word dictionary its length is:", len(cws_clean)
-     
-
-    co_mat = lil_matrix((len(cws_clean), len(cws_clean)) )
-    #co_mat=np.zeros( shape=(len(cws), len(cws) )   )
+    cws={} # dictionary of content words
+    cws = get_cws(ifs)
+ 
+    print "Finished generating word count"
     
+    try:
+        ofh = codecs.open(context_pairs_output_file, 'w', 'utf-8')
+    except:
+        print "Can't open ", context_pairs_output_file, "for writing" 
     n_lines = 0
     
     #global num_words
