@@ -84,7 +84,7 @@ def read_patterns_trie(patterns_input_file):
     return tr
 
 
-def  add_patt_instance(words, start, 0, patterns_trie, cws, ofh, word_vocab, context_vocab):
+def  add_patt_instance(words, start, patt_index, patterns_trie, cws, ofh, word_vocab, context_vocab):
     
     # Pattern found.
     if patterns_trie.node.has_key(PATT_STR):
