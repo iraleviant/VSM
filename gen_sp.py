@@ -13,8 +13,8 @@ import scipy.sparse as ss
 PATT_STR="PATT"
 CW_SYMBOL="CW"
 PATT_ELEMENTS_SEPERATOR="-"
-HIGH_FREQUENCY_THR = 0.8 #use constant HIGH_FREQUENCY_THR => 0.002; orig, mine_test=0.8
-MIN_FREQ =3 #orig=100, mine_test=3
+HIGH_FREQUENCY_THR = 0.002 #use constant HIGH_FREQUENCY_THR => 0.002; orig, mine_test=0.8
+MIN_FREQ =100 #orig=100, mine_test=3
 
 class Trie(object):
     """ Trie implementation in python 
@@ -162,7 +162,7 @@ def write_vocab(dict, output_file):
     
     ofh.close()
 
- def get_cws(files):
+def get_cws(files):
     print "Generating word count"
     # Generate list from text
     n_sent=0
@@ -242,15 +242,16 @@ def main():
     
     hfw_thr = 0.0001
 
-    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus/english_test.txt" #for test
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus/english_test.txt" #for test
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news-commentary-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/europarl-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2007.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2008.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2009.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2010.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2011.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2012.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2013.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2014.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2015.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
-    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
-    patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns_p.dat'
-    mat_file='test_mat.npz'
-    context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_test11.dat"
-    word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_test11.dat"
-    context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_test11.dat"
-      
+    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/news2012_phrase2.txt"
+    #input_files = "/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/example_after_2phrase.txt"
+    patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns.dat'
+    #mat_file='test_mat.npz'
+    context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_12.dat"
+    word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_12.dat"
+    context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_12.dat"
+    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_12.txt'  
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     word_vocab={}
@@ -261,7 +262,11 @@ def main():
       
     cws={} # dictionary of content words
     cws = get_cws(ifs)
- 
+    
+    with open(dic_file, 'w') as fl:
+        fl.write(json.dumps(cws))
+    #===========================================================================
+    
     print "Finished generating word count"
     
     try:
