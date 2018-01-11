@@ -84,7 +84,7 @@ def read_patterns_trie(patterns_input_file):
     return tr
 
 
-def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat):
+def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat, pat_words):
     
     # Pattern found.
     #global num_words
@@ -103,7 +103,12 @@ def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat
        
         co_mat[row,col]+=1
         co_mat[col,row]+=1
-    
+        
+        if row not in pat_words:
+            pat_words[row]=1
+        if col not in pat_words:
+            pat_words[col]=1
+        
         ### next in the original code: (I don't understand why extra incrementing)
         #$word_vocab->{$elements[1]}++;
         #$elements[0] .= "_r";
@@ -121,10 +126,10 @@ def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat
     # Next word could either be one of the words the continues a pattern, or a wildcard.
     if patterns_trie.node.has_key(words[start]):
         substr=patterns_trie.sub_trie(words[start])
-        add_patt_instance(words, start+1,patt_index+1, substr, cws_clean, co_mat)
+        add_patt_instance(words, start+1,patt_index+1, substr, cws_clean, co_mat, pat_words)
     elif (not bool(re.match(r'^(?!.*[a-z]+).*$', words[start])) ) and ( cws_clean.has_key(words[start]) )  and ( patterns_trie.node.has_key(CW_SYMBOL) ) :
         substr=patterns_trie.sub_trie(CW_SYMBOL)
-        add_patt_instance(words, start+1, patt_index+1, substr, cws_clean, co_mat)
+        add_patt_instance(words, start+1, patt_index+1, substr, cws_clean, co_mat, pat_words)
         
 
     
@@ -145,32 +150,44 @@ def main():
     
     hfw_thr = 0.0001
 
-    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus/english_test.txt" #for test
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus/english_test.txt" #for test
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news-commentary-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/europarl-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2007.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2008.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2009.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2010.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2011.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2012.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2013.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2014.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2015.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
-    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
-    patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns_p.dat'
-    mat_file='test_mat.npz'
-    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_test1.txt'
-    
+    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/webbase_phrase2.txt"
+    patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns.dat'
+    mat_file='webbase_mat.npz'
+    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_a.txt'
+    dic_file1='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_aclean.txt'
+    pat_words_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/pat_words.txt'
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     
     ifs = input_files.split(",")  #ifs=input files, spolits in case there are several input files
       
-    cws_clean = json.load(open(dic_file)) #this how you read json
-    print "Finished reading content word dictionary its length is:", len(cws_clean)
-     
-
+    cws = json.load(open(dic_file)) #this how you read json
+    print "Finished reading content word dictionary its length is:", len(cws)
+    
+    cws_clean=json.load(open(dic_file1))
+    print "Finished reading content word dictionary clean its length is:", len(cws_clean)
+    
+    count=0
+    #cws_num={}
+    for w in cws:
+        if bool(re.match(r'^[a-z_]+$', w )) :
+            cws_clean[w]=count
+            count+=1
+    
+    
     co_mat = lil_matrix((len(cws_clean), len(cws_clean)) )
     #co_mat=np.zeros( shape=(len(cws), len(cws) )   ) #doesn't work for huge size
     
     n_lines = 0
-
+    pat_words={}
+    
     for corpus_file in ifs:
         n_lines = 0
         print "Reading ", corpus_file
         try:
-            ifh = codecs.open(corpus_file, 'r', 'utf-8')
+            ifh = codecs.open(corpus_file, 'r', 'latin-1')
         except:
             print "Can't open ", corpus_file, "for reading"
             continue
@@ -189,18 +206,21 @@ def main():
             # Search for patterns starting at each word in the sentence.
             end_loop=len(words)-2
             for start in range(0,end_loop):
-                add_patt_instance(words, start, 0, patterns_trie, cws_clean, co_mat)
+                add_patt_instance(words, start, 0, patterns_trie, cws_clean, co_mat, pat_words)
         
         ifh.close()
         
     #===========================================================================
+    
+    
     print "Preparing to write co-occurence mat to file"
     
     ss.save_npz(mat_file, csr_matrix(co_mat))
 
     print "I'm here"
   
-    
+    with open(pat_words_file, 'w') as fl:
+        fl.write(json.dumps(pat_words))
 #################################################################     
 ########################
 
