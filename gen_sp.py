@@ -253,6 +253,7 @@ def main():
     context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_13.dat"
     dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_a.txt'  
     dic_file1='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_aclean.txt'  
+    dic_file2='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_all_clean_order.txt'
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     word_vocab={}
@@ -281,17 +282,24 @@ def main():
     
     
     cws_clean={}
-
+    cws_clean_order={}
+    
+    count=0
     for w in cws:
         if bool(re.match(r'^[a-z_]+$', w )) :
             cws_clean[w]=cws[w]
-    
+            cws_clean_order[w]=count
+            count+=1
+            
+            
     with open(dic_file1, 'w') as fl:
         fl.write(json.dumps(cws_clean))
+        
+    with open(dic_file2, 'w') as fl:
+        fl.write(json.dumps(cws_clean_order))
     
     print "Number of clean content words: ", len(cws_clean)
 
-    
     
     #===========================================================================
     #####################################################################################################################
