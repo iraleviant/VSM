@@ -104,10 +104,10 @@ def add_patt_instance(words, start, patt_index, patterns_trie, cws_clean, co_mat
         co_mat[row,col]+=1
         co_mat[col,row]+=1
         
-        if row not in pat_words:
-            pat_words[row]=1
-        if col not in pat_words:
-            pat_words[col]=1
+        if elements[0] not in pat_words:
+            pat_words[elements[0]]=1
+        if elements[1] not in pat_words:
+            pat_words[elements[1]]=1
         
         ### next in the original code: (I don't understand why extra incrementing)
         #$word_vocab->{$elements[1]}++;
@@ -150,35 +150,30 @@ def main():
     
     hfw_thr = 0.0001
 
-    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus/english_test.txt" #for test
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/wiki_phrase2.txt" 
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/billion_phrase2.txt"
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/news_2013_phrase2.txt"
+    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/news2012_phrase2.txt"
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news-commentary-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/europarl-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2007.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2008.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2009.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2010.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2011.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2012.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2013.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2014.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2015.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
-    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/webbase_phrase2.txt"
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/webbase_phrase2.txt"
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/example_after_2phrase.txt"
     patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns.dat'
-    mat_file='webbase_mat.npz'
-    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_a.txt'
-    dic_file1='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_aclean.txt'
-    pat_words_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/pat_words.txt'
+    
+    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_all_clean_order.txt'
+    
+    
+    pat_words_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/pat_words_12.txt'
+    mat_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/12_mat.npz'
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     
     ifs = input_files.split(",")  #ifs=input files, spolits in case there are several input files
       
-    cws = json.load(open(dic_file)) #this how you read json
-    print "Finished reading content word dictionary its length is:", len(cws)
-    
-    cws_clean=json.load(open(dic_file1))
+        
+    cws_clean=json.load(open(dic_file))
     print "Finished reading content word dictionary clean its length is:", len(cws_clean)
     
-    count=0
-    #cws_num={}
-    for w in cws:
-        if bool(re.match(r'^[a-z_]+$', w )) :
-            cws_clean[w]=count
-            count+=1
-    
-    
     co_mat = lil_matrix((len(cws_clean), len(cws_clean)) )
-    #co_mat=np.zeros( shape=(len(cws), len(cws) )   ) #doesn't work for huge size
     
     n_lines = 0
     pat_words={}
