@@ -13,7 +13,7 @@ import scipy.sparse as ss
 PATT_STR="PATT"
 CW_SYMBOL="CW"
 PATT_ELEMENTS_SEPERATOR="-"
-HIGH_FREQUENCY_THR = 0.002 #use constant HIGH_FREQUENCY_THR => 0.002; orig, mine_test=0.8
+HIGH_FREQUENCY_THR =0.002 #use constant HIGH_FREQUENCY_THR => 0.002; orig, mine_test=0.8
 MIN_FREQ =100 #orig=100, mine_test=3
 
 class Trie(object):
@@ -172,7 +172,7 @@ def get_cws(files):
     for corpus_file in files:
         print "Reading  ", corpus_file
         try:
-            ifh = codecs.open(corpus_file, 'r', 'utf-8')
+            ifh = codecs.open(corpus_file, 'r', 'latin-1')
         except:
             print "Can't open ", corpus_file, "for reading" 
             continue
@@ -216,7 +216,7 @@ def get_cws(files):
         if float(stats[word[0]])/n_words > HIGH_FREQUENCY_THR:
             continue    
         elif  stats[word[0]]>= MIN_FREQ:
-            cws[word[0]]=1
+            cws[word[0]]=word[1]
         else:
             break #it is sorted of the the word with the highest frequency doesn't> min_freq than none will be
             
@@ -244,14 +244,15 @@ def main():
 
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus/english_test.txt" #for test
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news-commentary-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/europarl-v6.en,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2007.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2008.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2009.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2010.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2011.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2012.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2013.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2014.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2015.en.shuffled,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/English_Corpus_P/news.2016.en.shuffled"
-    input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/news2012_phrase2.txt"
-    #input_files = "/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/example_after_2phrase.txt"
+    #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/wiki_example2.txt"
+    input_files = "/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/webbase_phrase2.txt,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/wiki_phrase2.txt,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/billion_phrase2.txt,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/news_2013_phrase2.txt,/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/clean_corpus_english/word_2phrase_corpus/news2012_phrase2.txt"
     patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns.dat'
     #mat_file='test_mat.npz'
-    context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_12.dat"
-    word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_12.dat"
-    context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_12.dat"
-    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_12.txt'  
+    context_pairs_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_pairs_13.dat"
+    word_vocabularty_output_file ="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_13.dat"
+    context_vocabularty_output_file="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/context_vocab_13.dat"
+    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_a.txt'  
+    dic_file1='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_aclean.txt'  
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     word_vocab={}
@@ -259,57 +260,91 @@ def main():
     
     ifs = input_files.split(",")  #ifs=input files, spolits in case there are several input files
     
+    #===========================================================================
+    # tmp={}
+    # ofh = codecs.open('words3.txt', 'w', 'utf-8')
+    # with open('/home/ira/Dropbox/IraTechnion/Patterns_Research/symmp_merged-ppmi-antonym2_10_wn_10000_100_10_all_cws_vecs_dense.dat') as f:
+    #     for l in f:
+    #         l=l.split(' ')
+    #         tmp[l[0]]=1
+    #         ofh.write(l[0])
+    #         ofh.write('\n') 
+    #===========================================================================
+           
       
     cws={} # dictionary of content words
     cws = get_cws(ifs)
     
+    print "Number of content words: ", len(cws)
     with open(dic_file, 'w') as fl:
         fl.write(json.dumps(cws))
-    #===========================================================================
     
+    
+    cws_clean={}
+
+    for w in cws:
+        if bool(re.match(r'^[a-z_]+$', w )) :
+            cws_clean[w]=cws[w]
+    
+    with open(dic_file1, 'w') as fl:
+        fl.write(json.dumps(cws_clean))
+    
+    print "Number of clean content words: ", len(cws_clean)
+
+    
+    
+    #===========================================================================
+    #####################################################################################################################
+    #####################################################################################################################
+    ##########################################################################################
+    #### Run up to here only   ####################################################################
+    #####################################################################################################################
+    #####################################################################################################################
     print "Finished generating word count"
     
-    try:
-        ofh = codecs.open(context_pairs_output_file, 'w', 'utf-8')
-    except:
-        print "Can't open ", context_pairs_output_file, "for writing" 
-    
-    n_lines = 0
-    
-    for corpus_file in ifs:
-        n_lines = 0
-        print "Reading ", corpus_file
-        try:
-            ifh = codecs.open(corpus_file, 'r', 'utf-8')
-        except:
-            print "Can't open ", corpus_file, "for reading"
-            continue
-         
-        for line in ifh:
-            n_lines=n_lines+1
-            if n_lines % 10000 == 0: #n_lines divides in 10000 without remainder
-                print  str(round(float(n_lines)/1000, 0))+'K'+'\r', 
-                sys.stdout.flush()
-                
-            line=line.strip()
-            line=line.lower() #lower case
-            #words=re.split("\W+", line) #\W non word, here 18 and in perl 20, re.split("\\W+", line) leaves only words
-            words=re.findall(r'\w+|[^\w\s]+', line) #this version the same as perl, \w+ - 1 or more word chars (letters, digits or underscores), | - or, [^\w\s] - 1 char other than word / whitespace
-            
-            # Search for patterns starting at each word in the sentence.
-            end_loop=len(words)-2
-            for start in range(0,end_loop):
-                add_patt_instance(words, start, 0, patterns_trie, cws, ofh, word_vocab, context_vocab)
-        
-        ifh.close()
-   
-    ofh.close()
-
-    print "Finished searching for patterns"
-        
-    # Writing word and context vocabularies.
-    write_vocab(word_vocab, word_vocabularty_output_file)
-    write_vocab(context_vocab, context_vocabularty_output_file)
+#===============================================================================
+#     try:
+#         ofh = codecs.open(context_pairs_output_file, 'w', 'utf-8')
+#     except:
+#         print "Can't open ", context_pairs_output_file, "for writing" 
+#     
+#     n_lines = 0
+#     
+#     for corpus_file in ifs:
+#         n_lines = 0
+#         print "Reading ", corpus_file
+#         try:
+#             ifh = codecs.open(corpus_file, 'r', 'utf-8')
+#         except:
+#             print "Can't open ", corpus_file, "for reading"
+#             continue
+#          
+#         for line in ifh:
+#             n_lines=n_lines+1
+#             if n_lines % 10000 == 0: #n_lines divides in 10000 without remainder
+#                 print  str(round(float(n_lines)/1000, 0))+'K'+'\r', 
+#                 sys.stdout.flush()
+#                 
+#             line=line.strip()
+#             line=line.lower() #lower case
+#             #words=re.split("\W+", line) #\W non word, here 18 and in perl 20, re.split("\\W+", line) leaves only words
+#             words=re.findall(r'\w+|[^\w\s]+', line) #this version the same as perl, \w+ - 1 or more word chars (letters, digits or underscores), | - or, [^\w\s] - 1 char other than word / whitespace
+#             
+#             # Search for patterns starting at each word in the sentence.
+#             end_loop=len(words)-2
+#             for start in range(0,end_loop):
+#                 add_patt_instance(words, start, 0, patterns_trie, cws, ofh, word_vocab, context_vocab)
+#         
+#         ifh.close()
+#    
+#     ofh.close()
+# 
+#     print "Finished searching for patterns"
+#         
+#     # Writing word and context vocabularies.
+#     write_vocab(word_vocab, word_vocabularty_output_file)
+#     write_vocab(context_vocab, context_vocabularty_output_file)
+#===============================================================================
     
     
     
