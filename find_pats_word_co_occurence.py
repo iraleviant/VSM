@@ -13,7 +13,7 @@ PATT_STR="PATT"
 CW_SYMBOL="CW"
 PATT_ELEMENTS_SEPERATOR="-"
 HIGH_FREQUENCY_THR = 0.002#use constant HIGH_FREQUENCY_THR => 0.002; orig, mine_test=0.8
-MIN_FREQ =100 #orig=100, mine_test=3
+MIN_FREQ =200 #orig=100, mine_test=3
 
 class Trie(object):
     """ Trie implementation in python 
@@ -228,10 +228,10 @@ def main():
     #input_files="/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/example_after_2phrase.txt"
     patterns_input_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/selected_patterns.dat'
     
-    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_ALLN_python.dat'
-    dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_ALLN_python_order.dat'
-    word_vocabulary_output_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_python_ALLN_python.dat'
-    mat_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/ALLN_python_mat.npz'
+    dic_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_all_pats_python_200.dat'
+    dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order_200.dat'
+    word_vocabulary_output_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/word_vocab_python_allpats_python_200.dat'
+    mat_file='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat_200.npz'
     # Read patterns into a Trie data structure.
     patterns_trie = read_patterns_trie(patterns_input_file)
     
@@ -278,9 +278,10 @@ def main():
                 line=line.strip()
                 line=line.lower() #lower case
                 #words=re.split("\W+", line) #\W non word, here 18 and in perl 20, re.split("\\W+", line) leaves only words
-                #words=re.findall(r'\w+|[^\w\s]+', line) #this version the same as perl, \w+ - 1 or more word chars (letters, digits or underscores), | - or, [^\w\s] - 1 char other than word / whitespace
-                words= re.compile("[ \t]+|\\b").split(line)
-                 
+                words=re.findall(r'\w+|[^\w\s]+', line) #this version the same as perl, \w+ - 1 or more word chars (letters, digits or underscores), | - or, [^\w\s] - 1 char other than word / whitespace
+                #words= re.compile("[ \t]+|[^\w\s]").split(line)
+                #words=re.split(r"[ \t]+|\b",line)
+                #words=re.findall(r'\w+|\W+', line)
                 # Search for patterns starting at each word in the sentence.
                 end_loop=len(words)-2
                 for start in range(0,end_loop):
