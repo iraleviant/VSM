@@ -30,20 +30,9 @@ def cosine_similarities(mat):
     return col_normed_mat.T * col_normed_mat
 
 def main():
-    
-    ####  Example ###########
-    #===========================================================================
-    # A =  csc_matrix(np.array([[1, 1, 1], [1, 1, 0]]))
-    # col_normed_A = pp.normalize(A.tocsc(), axis=0)
-    # cols=[0,2]
-    # nmat=col_normed_A[:,cols]
-    # res= nmat.T * nmat
-    # rows, cols = res.nonzero()
-    #===========================================================================
-
-    #######################################################################################################################
-    #dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order_200.dat'
-    dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order.dat'
+   
+    dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order_200.dat'
+    #dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order.dat'
     fread=codecs.open(dic_file_order)
     cws_clean={}
     
@@ -89,7 +78,12 @@ def main():
     
     
     #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/smooth_ppmi_all_pats_mat_200.npz')
-    mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/smooth_mat_simlex_allpats.npz')
+    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/mat_ppmi_round_allpats_200.npz')
+    mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat_200.npz')
+    
+    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/smooth_mat_simlex_allpats.npz')
+    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/mat_ppmi_round_allpats.npz')
+    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat.npz')
     col_normed_mat = pp.normalize(mat.tocsc(), axis=0) 
     del mat
         
@@ -100,9 +94,7 @@ def main():
     pair_list_human.sort(key=lambda x: - x[1])  ###sorts the list according to the human scores in descreasing order
     coverage = len(pair_list_human)
 
-    model_list = [] #list:[index, ((word1,word2), model_score) ]
-    model_scores = {} #{key=(word1,word2), value=cosine_sim_betwen_vectors}
-    
+    model_scores = {} #{key=(word1,word2), value=cosine_sim_betwen_vectors}    
     cnt=0
     for (x, y) in pair_list_human: #pair_list_human:((vanish,disappear),9.8)
         (word_i, word_j) = x
@@ -114,20 +106,12 @@ def main():
         c=new_dic_s[word_j]
         cosval=simL[r,c]
         model_scores[(word_i, word_j)] = round(cosval,2)
-        model_list.append(((word_i, word_j),  round(cosval,2)))
      
-    model_list.sort(key=lambda x: x[1]) ###sorts the list according to the model scores in increasing order
-     
-    spearman_original_list = []  #human indexes
-    spearman_target_list = []    # model indexes corresponding to the human indexes
     spearman_human_scores=[]
     spearman_model_scores=[]
          
     for position_1, (word_pair, score_1) in enumerate(pair_list_human):
         score_2 = model_scores[word_pair]
-        position_2 = model_list.index((word_pair, score_2))
-        spearman_original_list.append(position_1)
-        spearman_target_list.append(position_2)
         spearman_human_scores.append(score_1)
         spearman_model_scores.append(score_2)  
      
