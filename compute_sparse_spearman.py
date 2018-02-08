@@ -30,9 +30,20 @@ def cosine_similarities(mat):
     return col_normed_mat.T * col_normed_mat
 
 def main():
-   
-    dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order_200.dat'
-    #dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order.dat'
+    
+    ####  Example ###########
+    #===========================================================================
+    # A =  csc_matrix(np.array([[1, 1, 1], [1, 1, 0]]))
+    # col_normed_A = pp.normalize(A.tocsc(), axis=0)
+    # cols=[0,2]
+    # nmat=col_normed_A[:,cols]
+    # res= nmat.T * nmat
+    # rows, cols = res.nonzero()
+    #===========================================================================
+
+    #######################################################################################################################
+    #dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order_200.dat'
+    dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order.dat'
     fread=codecs.open(dic_file_order)
     cws_clean={}
     
@@ -79,12 +90,15 @@ def main():
     
     #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/smooth_ppmi_all_pats_mat_200.npz')
     #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/mat_ppmi_round_allpats_200.npz')
-    mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat_200.npz')
+    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat_200.npz')
     
     #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/smooth_mat_simlex_allpats.npz')
-    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/mat_ppmi_round_allpats.npz')
+    #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/mat_ppmi_round_allpats.npz') #best
     #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat.npz')
-    col_normed_mat = pp.normalize(mat.tocsc(), axis=0) 
+    mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/svd_reduced_mat_300_allpats.npz')
+    
+    nmat=mat.T #important for svd, for regular doesn't matter since the matrix is symmetric
+    col_normed_mat = pp.normalize(nmat.tocsc(), axis=0) 
     del mat
         
     new_mat=col_normed_mat[:,cols_cos]
