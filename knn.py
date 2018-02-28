@@ -34,10 +34,10 @@ def main():
     ###############################################################################################################
     alpha=7
     n=250
-    mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat.npz') #0.391
     #mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/mat_ppmi_round_allpats.npz') #0.433
+    mat=ss.load_npz('/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/all_pats_python_mat.npz') #0.391
     #nmat=mat.T #important for svd, for regular doesn't matter since the matrix is symmetric
-    normed_mat = pp.normalize(mat.tocsc(), axis=0) #(800, 700K)
+    #normed_mat = pp.normalize(mat.tocsc(), axis=0) #(800, 700K)
     
     #dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order_200.dat'
     dic_file_order='/home/ira/Dropbox/IraTechnion/Patterns_Research/sp_sg/cws_dictionary_allpats_python_order.dat'
@@ -76,10 +76,11 @@ def main():
     #cols_cos=sorted(set(rows_to_smooth)) #693,1596, 1675, 2117, 2290, 2843
     #cols_cos=sorted(set([361945,248945,357095,593200,533805,627531]))
     
-    for n in range(20,200, 10):
-        nbrs=NearestNeighbors(n_neighbors=n+1, algorithm='kd_tree', n_jobs=-1) # uses all cpus
-        nbrs.fit(normed_mat)
-        for alpha in range(10,20):    
+    for n in range(100,200, 10):
+        #nbrs=NearestNeighbors(n_neighbors=n+1, algorithm='ball_tree', n_jobs=-1) # uses all cpus
+        nbrs=NearestNeighbors(n_neighbors=n, algorithm='auto', metric='cosine', n_jobs=-1)
+        nbrs.fit(mat)
+        for alpha in range(5,20):    
             spr_list=[]
             matres = lil_matrix((len(cws_clean), mat.shape[1]) )
             test_size=0.25
@@ -103,7 +104,7 @@ def main():
                     if ind % 30 == 0: #n_lines divides in 10000 without remainder
                         print  str(ind)+'\r'
                         sys.stdout.flush()
-                    row_v=normed_mat[r,:]
+                    row_v=mat[r,:]
                     k_nnn=nbrs.kneighbors(row_v) #returns two arrays, the first is the distance array, and the second is the array of indexes closets to row_v
                     sum_knn=(mat[k_nnn[1][0][1:],:] ).sum(axis=0)
                     matres[r,:]=mat[r,:]+alpha*sum_knn
