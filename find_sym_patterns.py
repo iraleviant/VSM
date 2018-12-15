@@ -38,19 +38,20 @@ p1 = Dict(dicti, patt_edg, cws_list) #this is the object i want to pass to funct
 
 def main():
 
-    infile ="/home/ira/Google Drive/IraTechnion/PhD/patterns/english_test"  # Input file of plain text to compute set of SPs.
-    n_hfws=100 # Number of high frequency words (HFWs) that can serve as pattern elements.
+    #infile ="/home/ira/Google_Drive/IraTechnion/PhD/patterns/english_test"  # Input file of plain text to compute set of SPs.
+    infile="/home/ira/Google_Drive/IraTechnion/PhD/news_2012_clean"
+    n_hfws= 1000 ##100 # Number of high frequency words (HFWs) that can serve as pattern elements.
     n_cws=10000   # Number of content words (CWs) for computing the M measure (for efficiency)
     outfile="output_python.txt"  # Output file for selected SPs.
     m_thr = 0.05   # Threshold of M measure for selecting SPs, The only real important parameter is m_thr
-    top_m_thr = 0.05
-    max_pattern_length = 7   # Maximum pattern length to consider.
+    top_m_thr = 0.05 #0.02
+    max_pattern_length = 5 ##7   # Maximum pattern length to consider.
     min_num_of_edges_per_pattern = 3   # Minimum of edge types for a pattern to be considered a candidate. (5000)
     n_pattern_candidates = 5000   # Number of patterns to considered (the N most frequent patterns)
-    top_n_lines = 1000000 # Use only the top N lines for computing vocabulary and list of pattern candidates.
-    min_edge_frequency = 1 # 3   # Minimal frequency for edge to be considered in the 
+    top_n_lines = 1000000   # Use only the top N lines for computing vocabulary and list of pattern candidates.
+    min_edge_frequency = 3 # 3   # Minimal frequency for edge to be considered in the 
                                     # graph construction.
-    merge_sps= True  # Optional: merge patterns that are a longer version of 
+    merge_sps= False  # Optional: merge patterns that are a longer version of 
                                     #             another selected SP. 
     lc = False   # Convert text to lower case
 
@@ -135,10 +136,13 @@ def  gen_HFW_dict(infile, n_hfws, n_cws, lc, top_n_lines):
     #my $ifh = new IO::File($if) or die "Cannot open $if for reading";
     
     for line in ifh:
+        if line_ctr > top_n_lines:
+            break   
         if top_n_lines!=True or line_ctr < top_n_lines:
             line_ctr+=1
-            if line_ctr % 10000 == 0: #n_sent divides in 10000 without remainder
-                print ( str(round(float(line_ctr)/1000, 0))+'K'+'\r', )
+            if line_ctr % 100000 == 0: #n_sent divides in 10000 without remainder
+                print ( str(round(float(line_ctr)/100000, 0))+'K'+'\r', )
+                print(line_ctr)
                 sys.stdout.flush()
             line=line.rstrip()
             if lc:
@@ -163,10 +167,11 @@ def  gen_HFW_dict(infile, n_hfws, n_cws, lc, top_n_lines):
                         vocab[w]=1
                     else:
                         vocab[w]+=1
-                    
+                        
+                 
     write_vocab(vocab, "vocab.txt")
     
-    compare_dictionaries("vocab.txt", "/home/ira/Google Drive/IraTechnion/PhD/perl/perl_patts/vocab_perl.txt")
+    #compare_dictionaries("vocab.txt", "/home/ira/Google_Drive/IraTechnion/PhD/perl/perl_patts/vocab_perl.txt")
     
     print("Read ", line_ctr,"lines and ", len(vocab), "words" )
     hfws={}                
@@ -200,10 +205,12 @@ def get_pattern_candidates(infile, hfw_dict, cws, max_pattern_length, n_pattern_
     p1.dict ={}
     
     for line in ifh:
+        if line_ctr > top_n_lines:
+            break   
         if top_n_lines!=True or line_ctr < top_n_lines:
             line_ctr+=1
-            if line_ctr % 10000 == 0: #n_sent divides in 10000 without remainder
-                print ( str(round(float(line_ctr)/1000, 0))+'K'+'\r', )
+            if line_ctr % 100000 == 0: #n_sent divides in 10000 without remainder
+                print ( str(round(float(line_ctr)/10000, 0))+'K'+'\r', )
                 sys.stdout.flush()
             #add_pattern_instance_func(dic, st, extra_param)  add_pattern_instance_func(dict, st, cws)
             
@@ -428,7 +435,7 @@ def write_sps(of, select_sps):
     
     ifh.close()
     
-def usage(options, mandatory, help):
+def usage(options, mandatory, help): #ERROR
     for k in mandatory:
         if k=="ARRAY":
             for k2 in k:
@@ -458,7 +465,7 @@ def usage(options, mandatory, help):
         elif k not in options.keys():
             getopt_gen_message(options, mandatory)
         
-def getopt_gen_message(options, mandatory):
+def getopt_gen_message(options, mandatory):  ####ERROR
     
     print("0. \n")
     sorted_options=sorted(options.keys(), key=lambda x:-x[1])
