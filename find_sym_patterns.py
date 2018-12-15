@@ -46,12 +46,12 @@ def main():
     m_thr = 0.05   # Threshold of M measure for selecting SPs, The only real important parameter is m_thr
     top_m_thr = 0.05 #0.02
     max_pattern_length = 5 ##7   # Maximum pattern length to consider.
-    min_num_of_edges_per_pattern = 3   # Minimum of edge types for a pattern to be considered a candidate. (5000)
+    min_num_of_edges_per_pattern = 5#3   # Minimum of edge types for a pattern to be considered a candidate. (5000)
     n_pattern_candidates = 5000   # Number of patterns to considered (the N most frequent patterns)
     top_n_lines = 1000000   # Use only the top N lines for computing vocabulary and list of pattern candidates.
     min_edge_frequency = 3 # 3   # Minimal frequency for edge to be considered in the 
                                     # graph construction.
-    merge_sps= False  # Optional: merge patterns that are a longer version of 
+    merge_sps= True  # Optional: merge patterns that are a longer version of 
                                     #             another selected SP. 
     lc = False   # Convert text to lower case
 
@@ -77,7 +77,11 @@ def main():
     # Fourth, select symmetric patterns.
     print ("Selecting symmetric patterns.")
     selected_patterns = select_sps(pattern_edges, min_edge_frequency, m_thr)
-        
+    
+    print ("Writing all selected patterns to " )
+    write_sps("all_selected_patts_python.txt", selected_patterns)
+    
+    
     # Merge SPs that contain other SPs (e.g., "between CW and CW" contains "CW and CW", so we omit it.
     if (merge_sps):
         print ("Merging patterns" )
@@ -136,7 +140,7 @@ def  gen_HFW_dict(infile, n_hfws, n_cws, lc, top_n_lines):
     #my $ifh = new IO::File($if) or die "Cannot open $if for reading";
     
     for line in ifh:
-        if line_ctr > top_n_lines:
+        if line_ctr >= top_n_lines:
             break   
         if top_n_lines!=True or line_ctr < top_n_lines:
             line_ctr+=1
@@ -205,7 +209,7 @@ def get_pattern_candidates(infile, hfw_dict, cws, max_pattern_length, n_pattern_
     p1.dict ={}
     
     for line in ifh:
-        if line_ctr > top_n_lines:
+        if line_ctr >= top_n_lines:
             break   
         if top_n_lines!=True or line_ctr < top_n_lines:
             line_ctr+=1
