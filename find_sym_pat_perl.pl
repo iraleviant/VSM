@@ -25,7 +25,7 @@ use constant CW_SYMBOL => "CW";
 
 use constant MIN_PATT_LENGTH => 3;
 sub main(@) {
-        my $if="/home/ira/Google Drive/IraTechnion/PhD/patterns/english_test";
+        my $if="/home/ira/Google_Drive/IraTechnion/PhD/patterns/english_test";
         my $n_hfws= 1000;  #100;
         my $n_cws=10000;
         my $of="output_perl.txt";
@@ -36,7 +36,7 @@ sub main(@) {
 		my $n_pattern_candidates = 5000;
 		my $top_n_lines = 1000000;
 		my $min_edge_frequency = 3; ######1; #3;
-		my $merge_sps =0;
+		my $merge_sps =1;
 		my $lc;
 
         usage({
@@ -74,6 +74,10 @@ sub main(@) {
 		print "Selecting symmetric patterns.\n";
 		my $selected_patterns = select_sps($pattern_edges, $min_edge_frequency, $m_thr);
 		
+		print "Writing selected patterns to $of\n";
+		write_sps("all_selected_patts_perl.txt", $selected_patterns);
+		
+		
 		# Merge SPs that contain other SPs (e.g., "between CW and CW" contains "CW and CW", so we omit it.
 		if (defined $merge_sps) {
 			print "Merging patterns\n";
@@ -82,7 +86,7 @@ sub main(@) {
 
 		
 		# Last, write selected patterns to output file.
-		print "Writing selected patterns to $of\n";
+		print "Writing only symmetric selected patterns to $of\n";
 		write_sps($of, $selected_patterns);
 
         return 0;
